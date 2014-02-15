@@ -55,19 +55,20 @@ function main() {
 			return;
 		}
 		var shouldRaise = true; // whether to move the module to right under the base dir, or to remove it
-		if (fs.existsSync("./node_modules/" + name)) {
-			var packageJsonOfExisting = fs.readFileSync("./node_modules/" + name + "/package.json", { encoding: "utf-8" });
+		var raisedDir = "./node_modules/" + name;
+		if (fs.existsSync(raisedDir)) {
+			var packageJsonOfExisting = JSON.parse(fs.readFileSync(raisedDir + "/package.json", { encoding: "utf-8" }));
 			if (semver.lt(packageJsonOfExisting.version, version)) {
-				console.log("raising git-based module " + name + "@" + version + " at " + path + ", replacing the existing @" + packageJsonOfExisting.version);
+				console.log("raising git-based module " + name + "@" + version + " at " + path + " to " + raisedDir + ", replacing the existing @" + packageJsonOfExisting.version);
 			} else {
-				console.log("removing git-based module " + name + "@" + verison + " at " + path + ", @" + packageJsonOfExisting.version + " already exists");
+				console.log("removing git-based module " + name + "@" + version + " at " + path + ", " + name + "@" + packageJsonOfExisting.version + " already exists at " + raisedDir);
 				shouldRaise = false;
 			}
 		} else {
-			console.log("raising module " + name + "@" + version + " at " + path);
+			console.log("raising module " + name + "@" + version + " at " + path + " to " + raisedDir);
 		}
-		if (shouldMove) {
-			fs.renameSync(path, "./node_modules/" + name);
+		if (shouldRaise) {
+			fs.renameSync(path, raisedDir);
 		} else {
 			rmdir_r(path);
 		}
