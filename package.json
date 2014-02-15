@@ -12,6 +12,9 @@
   "bin": {
     "force-dedupe-git-modules": "./bin/force-dedupe-git-modules"
   },
+  "scripts": {
+    "test": "./test.pl"
+  },
   "dependencies": {
     "semver": "~2.2.1"
   }
