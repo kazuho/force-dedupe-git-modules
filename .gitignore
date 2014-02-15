@@ -1,0 +1,6 @@
+!.gitkeep
+node_modules/
+*~
+*.swp
+*.log
+tmp/
