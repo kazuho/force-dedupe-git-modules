@@ -1,0 +1,77 @@
+#! /usr/bin/env node
+
+var fs = require("fs");
+var semver = require("semver");
+
+function findModulesFromGit(modulePath, callback) {
+	// skip if package.json does not exist
+	if (! fs.existsSync(modulePath + "/package.json")) {
+		return;
+	}
+	// read and parse
+	var packageJsonSrc = fs.readFileSync(modulePath + "/package.json", { encoding: "utf-8" });
+	var packageJson = JSON.parse(packageJsonSrc);
+	// handle dependencies now
+	if (fs.existsSync(modulePath + "/node_modules")) {
+		var deps = fs.readdirSync(modulePath + "/node_modules");
+		for (var i = 0; i != deps.length; ++i) {
+			if (deps[i].charAt(0) == ".") {
+				continue;
+			}
+			findModulesFromGit(modulePath + "/node_modules/" + deps[i], callback);
+		}
+	}
+	// skip if is not a git-based module
+	if (typeof packageJson._from != "string") {
+		return;
+	}
+	var match = packageJson._from.match(/^([^@]+)@git\+ssh:/);
+	if (match == null) {
+		return;
+	}
+	var moduleName = match[1];
+	var moduleVersion = packageJson.version;
+	// notify the callback
+	callback(match[1], moduleVersion, modulePath);
+}
+
+function rmdir_r(dirPath) {
+	var files = fs.readdirSync(dirPath);
+	for (var i = 0; i != files.length; ++i) {
+		var filePath = dirPath + "/" + files[i];
+		if (fs.statSync(filePath).isDirectory()) {
+			rmdir_r(filePath);
+		} else {
+			fs.unlinkSync(filePath);
+		}
+	}
+	fs.rmdirSync(dirPath);
+}
+
+function main() {
+	findModulesFromGit(".", function (name, version, path) {
+		if (path.match(/^.(\/node_modules\/[^/]+|)$/)) {
+			console.log("skipping git-based module: " + name + " at " + path);
+			return;
+		}
+		var shouldRaise = true; // whether to move the module to right under the base dir, or to remove it
+		if (fs.existsSync("./node_modules/" + name)) {
+			var packageJsonOfExisting = fs.readFileSync("./node_modules/" + name + "/package.json", { encoding: "utf-8" });
+			if (semver.lt(packageJsonOfExisting.version, version)) {
+				console.log("raising git-based module " + name + "@" + version + " at " + path + ", replacing the existing @" + packageJsonOfExisting.version);
+			} else {
+				console.log("removing git-based module " + name + "@" + verison + " at " + path + ", @" + packageJsonOfExisting.version + " already exists");
+				shouldRaise = false;
+			}
+		} else {
+			console.log("raising module " + name + "@" + version + " at " + path);
+		}
+		if (shouldMove) {
+			fs.renameSync(path, "./node_modules/" + name);
+		} else {
+			rmdir_r(path);
+		}
+	});
+}
+
+main();
