@@ -6,14 +6,7 @@ var fs = require("fs");
 var semver = require("semver");
 
 function findModulesFromGit(modulePath, callback) {
-	// skip if package.json does not exist
-	if (! fs.existsSync(modulePath + "/package.json")) {
-		return;
-	}
-	// read and parse
-	var packageJsonSrc = fs.readFileSync(modulePath + "/package.json", { encoding: "utf-8" });
-	var packageJson = JSON.parse(packageJsonSrc);
-	// handle dependencies now
+	// handle dependencies
 	if (fs.existsSync(modulePath + "/node_modules")) {
 		var deps = fs.readdirSync(modulePath + "/node_modules");
 		for (var i = 0; i != deps.length; ++i) {
@@ -23,6 +16,13 @@ function findModulesFromGit(modulePath, callback) {
 			findModulesFromGit(modulePath + "/node_modules/" + deps[i], callback);
 		}
 	}
+	// skip if package.json does not exist
+	if (! fs.existsSync(modulePath + "/package.json")) {
+		return;
+	}
+	// read and parse
+	var packageJsonSrc = fs.readFileSync(modulePath + "/package.json", { encoding: "utf-8" });
+	var packageJson = JSON.parse(packageJsonSrc);
 	// skip if is not a git-based module
 	if (typeof packageJson._from != "string") {
 		return;
