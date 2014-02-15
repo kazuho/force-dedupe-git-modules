@@ -51,7 +51,7 @@ function rmdir_r(dirPath) {
 function main() {
 	findModulesFromGit(".", function (name, version, path) {
 		if (path.match(/^.(\/node_modules\/[^/]+|)$/)) {
-			console.log("skipping git-based module: " + name + " at " + path);
+			console.log("preserving git-based module: " + name + " at " + path);
 			return;
 		}
 		var shouldRaise = true; // whether to move the module to right under the base dir, or to remove it
