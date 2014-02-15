@@ -56,23 +56,20 @@ function main() {
 			console.log("preserving git-based module: " + name + " at " + path);
 			return;
 		}
-		var shouldRaise = true; // whether to move the module to right under the base dir, or to remove it
 		var raisedDir = "./node_modules/" + name;
 		if (fs.existsSync(raisedDir)) {
 			var packageJsonOfExisting = JSON.parse(fs.readFileSync(raisedDir + "/package.json", { encoding: "utf-8" }));
 			if (semver.lt(packageJsonOfExisting.version, version)) {
 				console.log("raising git-based module " + name + "@" + version + " at " + path + " to " + raisedDir + ", replacing the existing @" + packageJsonOfExisting.version);
+				rmdir_r(raisedDir);
+				fs.renameSync(path, raisedDir);
 			} else {
 				console.log("removing git-based module " + name + "@" + version + " at " + path + ", " + name + "@" + packageJsonOfExisting.version + " already exists at " + raisedDir);
-				shouldRaise = false;
+				rmdir_r(path);
 			}
 		} else {
 			console.log("raising module " + name + "@" + version + " at " + path + " to " + raisedDir);
-		}
-		if (shouldRaise) {
 			fs.renameSync(path, raisedDir);
-		} else {
-			rmdir_r(path);
 		}
 	});
 }
