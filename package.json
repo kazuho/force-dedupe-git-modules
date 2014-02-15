@@ -17,5 +17,6 @@
   },
   "dependencies": {
     "semver": "~2.2.1"
-  }
+  },
+  "homepage": "https://github.com/kazuho/force-dedupe-git-modules"
 }
