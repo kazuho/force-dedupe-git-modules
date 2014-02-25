@@ -41,7 +41,7 @@ function rmdir_r(dirPath) {
 	var files = fs.readdirSync(dirPath);
 	for (var i = 0; i != files.length; ++i) {
 		var filePath = dirPath + "/" + files[i];
-		if (fs.statSync(filePath).isDirectory()) {
+		if (fs.lstatSync(filePath).isDirectory()) {
 			rmdir_r(filePath);
 		} else {
 			fs.unlinkSync(filePath);
