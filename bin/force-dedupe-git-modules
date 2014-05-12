@@ -27,7 +27,7 @@ function findModulesFromGit(modulePath, callback) {
 	if (typeof packageJson._from != "string") {
 		return;
 	}
-	var match = packageJson._from.match(/^([^@]+)@git\+ssh:/);
+	var match = packageJson._from.match(/^([^@]+)@git(\+ssh)?:/);
 	if (match == null) {
 		return;
 	}
