@@ -26,10 +26,11 @@ function findModulesFromGit(modulePath, callback) {
 		var packageJson = JSON.parse(packageJsonSrc);
 	} catch (error) {
 		// Handle invalid package.json files. Simply return
+		console.warn("Error parsing " + modulePath + "/package.json");
 		console.warn(error);
 		return;
 	}
-	
+
 	// skip if is not a git-based module
 	if (typeof packageJson._from != "string") {
 		return;
