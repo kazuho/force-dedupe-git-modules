@@ -22,7 +22,14 @@ function findModulesFromGit(modulePath, callback) {
 	}
 	// read and parse
 	var packageJsonSrc = fs.readFileSync(modulePath + "/package.json", { encoding: "utf-8" });
-	var packageJson = JSON.parse(packageJsonSrc);
+	try {
+		var packageJson = JSON.parse(packageJsonSrc);
+	} catch (error) {
+		// Handle invalid package.json files. Simply return
+		console.warn(error);
+		return;
+	}
+	
 	// skip if is not a git-based module
 	if (typeof packageJson._from != "string") {
 		return;
