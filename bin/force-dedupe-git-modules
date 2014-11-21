@@ -20,15 +20,16 @@ function findModulesFromGit(modulePath, callback) {
 	if (! fs.existsSync(modulePath + "/package.json")) {
 		return;
 	}
-	// read and parse
+	
+	// read package.json
 	var packageJsonSrc = fs.readFileSync(modulePath + "/package.json", { encoding: "utf-8" });
+	
+	// try to parse package.json
 	try {
 		var packageJson = JSON.parse(packageJsonSrc);
 	} catch (error) {
-		// Handle invalid package.json files. Simply return
-		console.warn("Error parsing " + modulePath + "/package.json");
-		console.warn(error);
-		return;
+		// throw a better error for parsing
+		throw new Error("Error parsing " + modulePath + "/package.json. Invalid file.");
 	}
 
 	// skip if is not a git-based module
