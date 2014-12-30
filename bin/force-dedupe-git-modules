@@ -28,13 +28,21 @@ function findModulesFromGit(modulePath, callback) {
 		return;
 	}
 	var match = packageJson._from.match(/^([^@]+)@git(\+ssh|\+https?)?:/);
-	if (match == null) {
-		return;
+	var moduleName = null;
+	if (match !== null) {
+		moduleName = match[1];
+	} else {
+		var matchResolved = packageJson._resolved.match(/^git(\+ssh|\+https?)?:/);
+		if (matchResolved === null) {
+			return;
+		}
+
+		match = packageJson._resolved.split('/');
+		moduleName = match[match.length-1].split('#')[0];
 	}
-	var moduleName = match[1];
 	var moduleVersion = packageJson.version;
 	// notify the callback
-	callback(match[1], moduleVersion, modulePath);
+	callback(moduleName, moduleVersion, modulePath);
 }
 
 function rmdir_r(dirPath) {
