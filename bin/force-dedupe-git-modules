@@ -31,7 +31,7 @@ function findModulesFromGit(modulePath, callback) {
 	var moduleName = null;
 	if (match !== null) {
 		moduleName = match[1];
-	} else {
+	} else if (packageJson._resolved) {
 		var matchResolved = packageJson._resolved.match(/^git(\+ssh|\+https?)?:/);
 		if (matchResolved === null) {
 			return;
@@ -40,6 +40,11 @@ function findModulesFromGit(modulePath, callback) {
 		match = packageJson._resolved.split('/');
 		moduleName = match[match.length-1].split('#')[0];
 	}
+
+	if (match === null) {
+		return;
+	}
+
 	var moduleVersion = packageJson.version;
 	// notify the callback
 	callback(moduleName, moduleVersion, modulePath);
