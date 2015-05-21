@@ -27,27 +27,46 @@ function findModulesFromGit(modulePath, callback) {
 	if (typeof packageJson._from != "string") {
 		return;
 	}
-	var match = packageJson._from.match(/^([^@]+)@git(\+ssh|\+https?)?:/);
-	var moduleName = null;
-	if (match !== null) {
-		moduleName = match[1];
-	} else if (packageJson._resolved) {
-		var matchResolved = packageJson._resolved.match(/^git(\+ssh|\+https?)?:/);
-		if (matchResolved === null) {
-			return;
-		}
 
-		match = packageJson._resolved.split('/');
-		moduleName = match[match.length-1].split('#')[0];
-	}
+	var moduleName = packageJson.name;
+	var moduleVersion = packageJson.version;
 
-	if (match === null) {
+	if (!isGitModule(packageJson)) {
 		return;
 	}
 
-	var moduleVersion = packageJson.version;
+	if (typeof moduleName === "string") {
+		return callback(moduleName, moduleVersion, modulePath);
+	}
+
+	moduleName = getModuleName(packageJson);
+
 	// notify the callback
 	callback(moduleName, moduleVersion, modulePath);
+}
+
+function getModuleName(packageJson) {
+	var match = packageJson._from.match(/^([^@]+)@git(\+ssh|\+https?)?:/);
+	if (match !== null) {
+		return match[1];
+	}
+
+	match = packageJson._resolved.split('/');
+	return match[match.length-1].split('#')[0];
+}
+
+function isGitModule(packageJson) {
+	if (packageJson._from &&
+		  packageJson._from.match(/^([^@]+)@git(\+ssh|\+https?)?:/) !== null) {
+		return true;
+	}
+
+	if (packageJson._resolved &&
+		  packageJson._resolved.match(/^git(\+ssh|\+https?)?:/) !== null) {
+		return true;
+	}
+
+	return false;
 }
 
 function rmdir_r(dirPath) {
@@ -65,6 +84,7 @@ function rmdir_r(dirPath) {
 
 function main() {
 	findModulesFromGit(".", function (name, version, path) {
+		console.log(name, path);
 		if (path.match(/^.(\/node_modules\/[^/]+|)$/)) {
 			console.log("preserving git-based module: " + name + " at " + path);
 			return;
