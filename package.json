@@ -1,6 +1,6 @@
 {
   "name": "force-dedupe-git-modules",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "forcibly dedupes the git-based NPM modules in node_modules",
   "license": "MIT",
   "keywords": [
